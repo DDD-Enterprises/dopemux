@@ -1,0 +1,12 @@
+🍑 dopemux Brand Implementation Guide
+🏆 1. Official Names and Aliases
+Primary CLI name:
+dopemux
+Filthy/Branded Emoji Variants:
+💊dopemux
+døpemux
+dope⧉mux
+Short/shell-safe alias:
+dpmx (for scripts, plain installs)
+In your README, manpage, and help output, use both the emoji/unicode and safe forms:
+dopemux / 💊dopemux / dope⧉mux / dpmx — Terminal Dopamine, Filth Edition

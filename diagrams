@@ -1,0 +1,115 @@
+'''
+classDiagram
+    class CLI {
+      +parse_args()
+      +banner()
+      +prompt()
+      +run_mode()
+    }
+    class Memory {
+      +load()
+      +save()
+    }
+    class Devlog {
+      +append()
+      +read()
+      +snapshot()
+    }
+    class Prompts {
+      +switch()
+      +list_profiles()
+    }
+    class FocusTUI {
+      +dashboard()
+      +resume()
+      +save_snapshot()
+    }
+
+    CLI --> Memory
+    CLI --> Devlog
+    CLI --> Prompts
+    CLI --> FocusTUI
+    FocusTUI --> Memory
+    FocusTUI --> Devlog
+
+'''
+
+'''
+sequenceDiagram
+    participant U as User
+    participant DM as dopemux
+    participant M as memory.md
+    participant L as logs/
+    U->>DM: Start dopemux
+    DM->>U: Banner & Prompt
+    U->>DM: Choose resume/new goal
+    alt Resume
+        DM->>M: Read memory.md
+    else New
+        DM->>U: Prompt for goal
+        DM->>M: Write memory.md
+        DM->>L: Append devlog
+    end
+    U->>DM: Save snapshot?
+    DM->>L: Save memory.md to logs/
+'''
+
+'''[User] --run--> [dopemux]
+   |                |
+   |         [Prompt: Resume or New?]
+   |           |         |
+   |           v         v
+   |      [Load mem]   [Prompt new goal]
+   |           |         |
+   |           +----> [Update log]
+   |                     |
+   +--------<------------+
+   |
+[User works, triggers Save Snapshot]
+   |
+[Copy mem to logs/]
+'''
+
+'''graph TD
+    U(User) -->|Run dopemux| CLI[CLI Entrypoint]
+    CLI -->|Reads/Writes| MEM[memory.md]
+    CLI -->|Appends| LOG[logs/]
+    CLI -->|Loads| PRM[prompts/]
+    CLI -->|Runs| TUI[focus.sh/focus-tui.sh]
+    TUI --> MEM
+    TUI --> LOG
+    COPI[Copilot/LLM] -->|Reads| PRM
+    COPI -->|Uses| MEM
+'''
+
+'''flowchart TD
+    Start([User runs dopemux])
+    Start --> Banner{{Show Banner & Prompt}}
+    Banner -->|Resume| LoadMem([Load memory.md])
+    Banner -->|New goal| NewGoal([Prompt: New Goal])
+    LoadMem --> MainFlow([User Codes])
+    NewGoal --> UpdateMem([Update memory.md & log])
+    UpdateMem --> MainFlow
+    MainFlow --> SaveSnap{Save snapshot?}
+    SaveSnap -->|Yes| Save([Save to logs/])
+    SaveSnap -->|No| End([Session Ends])
+    Save --> End
+'''
+
+'''             ┌────────────┐
+             │  Terminal  │
+             │ (dopemux)  │
+             └─────┬──────┘
+                   │
+        ┌──────────┴───────────┐
+        │      Core Logic      │
+        │ CLI, Mode, Aliases   │
+        └───┬─────┬──────┬─────┘
+            │     │      │
+    ┌───────┘     │      └────────┐
+    │             │               │
+┌──────┐     ┌─────────┐     ┌─────────┐
+│memory│     │ devlog  │     │ prompts │
+│ .md  │     │ logs/   │     │ profiles│
+└──────┘     └─────────┘     └─────────┘
+'''
