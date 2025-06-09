@@ -1,0 +1,41 @@
+# dopemux – ChatGPT/CLI Memory Integration
+
+## What is dopemux?
+A filthy, ADHD-fighting, memory-rich terminal focus tool with session banners, emoji aliases, and context dumps.  
+Install with Homebrew, curl, or run `install.sh` directly.
+
+## Core Files for Project Context
+- `README.md` – Overview, branding, banner examples
+- `dev/memory.md` – Memory dump/context log for AI and CLI
+- `dev/devlog_template.md` – Session logging, decisions
+- `src/dopemux` – Main script, CLI logic
+- `install.sh` – Install and alias logic (emoji/safe)
+- `dev/focus.sh`, `dev/prompts/` – Shell helpers, prompt libraries
+
+## How to Checkpoint (Dump Memory)
+- At the end of a dev/AI session, fill the memory checkpoint prompt (above)
+- Output as CSV row, save as `dopemux_YYYY-MM-DD.csv` in `/mnt/data/project_csv_dumps/`
+
+## How to Reload (Prime Context)
+- Paste the latest checkpoint markdown or CSV row into ChatGPT at thread start
+- Or use `dopemux memory --reload` (future CLI) to pull from latest memory.md
+
+## File Limit/Best Practice (ChatGPT Projects)
+- Keep these files always uploaded:
+    - `README.md`, `instructions.txt`
+    - `dev/memory.md`, `dev/devlog_template.md`
+    - `src/dopemux`, `install.sh`, `dev/focus.sh`
+    - `branding/logo.svg`, minimal workflows/assets
+- Archive or zip legacy docs/examples if over 10-file limit.
+
+## Branding, Banner, Mode Escalation
+- Always use the filthy ASCII/emoji banners in program output, help, and logs
+- Support all official aliases (dpmx, døpemux, 💊dopemux)
+- Context log should always track persona, mode, session type in `extra`
+
+## Ignore
+- node_modules/, __pycache__/, logs/, system temp
+
+## Automation
+- Use `context_archive.sh`, `dirtycommit.sh`, and friends from dev/tools for session dumps and commit tagging.
+- All scripts are dopemux-compatible; document usage in README and devlog.

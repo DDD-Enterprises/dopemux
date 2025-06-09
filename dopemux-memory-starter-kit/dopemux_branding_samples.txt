@@ -1,0 +1,8 @@
+💊🍑🍆 dope⧉mux — Dopamine-Driven Terminal Focus
+
+Dom, you dirty genius, ready to make this code moan?
+(Resume [🍆], New Focus [💊], Split Session [⧉], Save Memory [🧠])
+Aliases: dopemux, dpmx, døpemux, dope⧉mux, 💊dopemux
+
+echo $BANNER
+ln -sf /usr/local/bin/dopemux /usr/local/bin/dpmx
