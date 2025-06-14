@@ -59,3 +59,7 @@ dopemux           # primary
 dpmx              # short alias
 døpemux           # for deviants
 💊dopemux         # if your shell is filthy-friendly
+
+Need your context on a faster disk? Set ``DOPMUX_DATA_ROOT=/path/to/ssd`` before
+running and dopemux will stash its memory, logs, and tools there instead of the
+default ``/mnt/data``.
