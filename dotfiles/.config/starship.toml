@@ -1,0 +1,44 @@
+add_newline = true
+
+[character]
+success_symbol = "[➜](#8AADF4)"
+error_symbol = "[✗](#F38BA8)"
+
+[username]
+style_user = "#A6ADC8"
+style_root = "#F28FAD"
+format = "[$user]($style) "
+
+[hostname]
+style = "#DDB6F2"
+format = "[@$hostname]($style) "
+
+[directory]
+style = "#8BE9FD"
+read_only = " "
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+[git_branch]
+symbol = " "
+style = "#89DCEB"
+
+[package]
+symbol = "📦 "
+style = "#7DC4E4"
+
+[cmd_duration]
+style = "#B5E8E0"
+
+[python]
+style = "#A6E3A1"
+
+[time]
+disabled = false
+style = "#CBA6F7"
+format = "[$time]($style)"
+
+[custom.poetry]
+command = "poetry"
+when = true
+style = "#8AADF4"
+format = "[poetry](#8AADF4) "
