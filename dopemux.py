@@ -1,3 +1,11 @@
+"""dopemux automation helper
+Allows specifying a custom data location via the ``DOPMUX_DATA_ROOT``
+environment variable. Default is ``/mnt/data``.
+"""
+
+import os
+from pathlib import Path
+
 # Define basic shell script templates for each tool in the automation suite
 
 tool_scripts = {
@@ -76,7 +84,8 @@ echo "🧬 Dumped design specs to dev/logs/full_specs_dump.md"
 }
 
 # Write all automation tools to their script files
-script_dir = Path("/mnt/data/dev/tools")
+data_root = Path(os.environ.get("DOPMUX_DATA_ROOT", "/mnt/data"))
+script_dir = data_root / "dev" / "tools"
 script_dir.mkdir(parents=True, exist_ok=True)
 
 for name, content in tool_scripts.items():
