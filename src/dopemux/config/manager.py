@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 import yaml
 import toml
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from dataclasses import dataclass
 
 class ADHDProfile(BaseModel):
@@ -23,7 +23,7 @@ class ADHDProfile(BaseModel):
     notification_style: str = Field(default="gentle", description="Notification style")
     visual_complexity: str = Field(default="minimal", description="Preferred visual complexity")
 
-    @validator('distraction_sensitivity')
+    @field_validator('distraction_sensitivity')
     def validate_sensitivity(cls, v):
         if not 0 <= v <= 1:
             raise ValueError('Distraction sensitivity must be between 0 and 1')
