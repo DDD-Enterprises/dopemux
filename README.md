@@ -18,6 +18,7 @@ Dopemux transforms chaotic development workflows into structured, attention-frie
 - **PRD-to-Tasks**: Transform Product Requirements Documents into actionable task breakdowns
 - **Intelligent Scheduling**: Optimal task sequencing based on attention patterns and complexity
 - **Bidirectional Sync**: Seamless data flow between Leantime project management and Task-Master AI
+- **Claude Auto Responder**: Automatic Claude Code confirmation responses with ADHD accommodations
 - **Real-time Optimization**: Continuous workflow adaptation based on performance metrics
 
 ### 🐳 Self-Hosted Infrastructure

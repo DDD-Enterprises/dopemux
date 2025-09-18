@@ -54,6 +54,27 @@ class ContextConfig(BaseModel):
     compression: bool = True
     backup_enabled: bool = True
 
+class ClaudeAutoResponderConfig(BaseModel):
+    """Claude Auto Responder configuration."""
+    enabled: bool = Field(default=False, description="Enable automatic Claude Code confirmation responses")
+    terminal_scope: str = Field(default="current", description="Terminal scope: 'current', 'all', or 'project'")
+    response_delay: float = Field(default=0.0, description="Response delay in seconds")
+    timeout_minutes: int = Field(default=30, description="Auto-stop after X minutes of inactivity")
+    whitelist_tools: bool = Field(default=True, description="Only respond to whitelisted tools")
+    debug_mode: bool = Field(default=False, description="Enable debug logging")
+
+    @field_validator('response_delay')
+    def validate_delay(cls, v):
+        if v < 0 or v > 10:
+            raise ValueError('Response delay must be between 0 and 10 seconds')
+        return v
+
+    @field_validator('terminal_scope')
+    def validate_scope(cls, v):
+        if v not in ['current', 'all', 'project']:
+            raise ValueError('Terminal scope must be "current", "all", or "project"')
+        return v
+
 class DopemuxConfig(BaseModel):
     """Main Dopemux configuration."""
     version: str = "1.0"
@@ -61,6 +82,7 @@ class DopemuxConfig(BaseModel):
     mcp_servers: Dict[str, MCPServerConfig] = Field(default_factory=dict)
     attention: AttentionConfig = Field(default_factory=AttentionConfig)
     context: ContextConfig = Field(default_factory=ContextConfig)
+    claude_autoresponder: ClaudeAutoResponderConfig = Field(default_factory=ClaudeAutoResponderConfig)
     claude_path: Optional[str] = None
     project_templates: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
@@ -187,6 +209,19 @@ class ConfigManager:
                 setattr(config.adhd_profile, key, value)
         self.save_user_config(config)
 
+    def get_claude_autoresponder_config(self) -> ClaudeAutoResponderConfig:
+        """Get Claude Auto Responder configuration."""
+        config = self.load_config()
+        return config.claude_autoresponder
+
+    def update_claude_autoresponder(self, **kwargs) -> None:
+        """Update Claude Auto Responder settings."""
+        config = self.load_config()
+        for key, value in kwargs.items():
+            if hasattr(config.claude_autoresponder, key):
+                setattr(config.claude_autoresponder, key, value)
+        self.save_user_config(config)
+
     def get_claude_settings(self) -> Dict[str, Any]:
         """Get Claude Code settings for MCP integration."""
         config = self.load_config()
@@ -236,6 +271,14 @@ class ConfigManager:
                 "max_sessions": 50,
                 "compression": True,
                 "backup_enabled": True
+            },
+            "claude_autoresponder": {
+                "enabled": False,
+                "terminal_scope": "current",
+                "response_delay": 0.0,
+                "timeout_minutes": 30,
+                "whitelist_tools": True,
+                "debug_mode": False
             },
             "project_templates": self._get_project_templates()
         }
@@ -293,6 +336,17 @@ class ConfigManager:
                 "args": ["-y", "exa-mcp"],
                 "env": {
                     "EXA_API_KEY": "${EXA_API_KEY}"
+                },
+                "timeout": 30,
+                "auto_restart": True
+            },
+            "leantime": {
+                "enabled": False,  # Disabled by default until package is fixed
+                "command": "npx",
+                "args": ["-y", "leantime-mcp"],
+                "env": {
+                    "LEANTIME_URL": "${LEANTIME_URL}",
+                    "LEANTIME_API_KEY": "${LEANTIME_API_KEY}"
                 },
                 "timeout": 30,
                 "auto_restart": True

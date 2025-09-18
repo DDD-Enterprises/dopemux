@@ -20,6 +20,7 @@ from . import __version__
 from .config import ConfigManager
 from .claude import ClaudeLauncher, ClaudeConfigurator
 from .adhd import ContextManager, AttentionMonitor, TaskDecomposer
+from integrations.claude_autoresponder import create_autoresponder_manager
 
 console = Console()
 
@@ -403,6 +404,279 @@ def task(ctx, description: Optional[str], duration: int, priority: str, list_tas
     console.print(f"[blue]🆔 ID: {task_id}[/blue]")
     console.print(f"[yellow]⏱️ Duration: {duration} minutes[/yellow]")
     console.print(f"[cyan]🎯 Priority: {priority}[/cyan]")
+
+@cli.group()
+@click.pass_context
+def autoresponder(ctx):
+    """
+    🤖 Manage Claude Auto Responder integration
+
+    Automatic confirmation responses for Claude Code prompts with
+    ADHD-optimized controls and attention-aware features.
+    """
+    pass
+
+@autoresponder.command('start')
+@click.option('--terminal-scope', '-t', type=click.Choice(['current', 'all', 'project']),
+              help='Terminal scope for monitoring')
+@click.option('--delay', '-d', type=float, help='Response delay in seconds (0-10)')
+@click.option('--timeout', type=int, help='Auto-stop timeout in minutes')
+@click.option('--whitelist/--no-whitelist', default=None, help='Enable/disable tool whitelisting')
+@click.option('--debug/--no-debug', default=None, help='Enable/disable debug mode')
+@click.pass_context
+def autoresponder_start(ctx, terminal_scope, delay, timeout, whitelist, debug):
+    """
+    🚀 Start Claude Auto Responder
+
+    Begins automatic confirmation of Claude Code prompts with current
+    configuration settings and ADHD optimizations.
+    """
+    config_manager = ctx.obj['config_manager']
+    project_path = Path.cwd()
+
+    if not (project_path / '.dopemux').exists():
+        console.print("[red]No Dopemux project found in current directory[/red]")
+        sys.exit(1)
+
+    # Update configuration if options provided
+    updates = {}
+    if terminal_scope: updates['terminal_scope'] = terminal_scope
+    if delay is not None: updates['response_delay'] = delay
+    if timeout: updates['timeout_minutes'] = timeout
+    if whitelist is not None: updates['whitelist_tools'] = whitelist
+    if debug is not None: updates['debug_mode'] = debug
+
+    if updates:
+        config_manager.update_claude_autoresponder(**updates)
+
+    autoresponder_manager = create_autoresponder_manager(config_manager, project_path)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Starting auto responder...", total=None)
+
+        success = autoresponder_manager.start()
+
+        if success:
+            progress.update(task, description="Auto responder started! 🤖", completed=True)
+            console.print("[green]✅ Claude Auto Responder is now active[/green]")
+            console.print("[blue]🎯 Monitoring for Claude Code confirmation prompts[/blue]")
+
+            config = config_manager.get_claude_autoresponder_config()
+            console.print(f"[yellow]📡 Scope: {config.terminal_scope}[/yellow]")
+            if config.response_delay > 0:
+                console.print(f"[cyan]⏱️ Delay: {config.response_delay}s[/cyan]")
+            console.print(f"[dim]💤 Auto-stop after {config.timeout_minutes} minutes of inactivity[/dim]")
+        else:
+            progress.update(task, description="Failed to start", completed=True)
+            console.print("[red]❌ Failed to start auto responder[/red]")
+            console.print("[yellow]💡 Try running 'dopemux autoresponder setup' first[/yellow]")
+            sys.exit(1)
+
+@autoresponder.command('stop')
+@click.pass_context
+def autoresponder_stop(ctx):
+    """
+    ⏹️ Stop Claude Auto Responder
+
+    Stops automatic confirmation and displays session statistics.
+    """
+    config_manager = ctx.obj['config_manager']
+    project_path = Path.cwd()
+
+    if not (project_path / '.dopemux').exists():
+        console.print("[red]No Dopemux project found in current directory[/red]")
+        sys.exit(1)
+
+    autoresponder_manager = create_autoresponder_manager(config_manager, project_path)
+
+    if not autoresponder_manager.is_running():
+        console.print("[yellow]Auto responder is not running[/yellow]")
+        return
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Stopping auto responder...", total=None)
+
+        # Get stats before stopping
+        status = autoresponder_manager.get_status()
+
+        success = autoresponder_manager.stop()
+
+        if success:
+            progress.update(task, description="Auto responder stopped", completed=True)
+            console.print("[green]✅ Claude Auto Responder stopped[/green]")
+
+            # Show session stats
+            console.print(f"[blue]📊 Session Statistics:[/blue]")
+            console.print(f"  ⏱️ Uptime: {status['uptime_minutes']:.1f} minutes")
+            console.print(f"  ✅ Responses sent: {status['responses_sent']}")
+            if status['responses_sent'] > 0:
+                console.print(f"  📈 Rate: {status['responses_per_minute']:.1f} responses/min")
+        else:
+            progress.update(task, description="Error stopping", completed=True)
+            console.print("[red]❌ Error stopping auto responder[/red]")
+
+@autoresponder.command('status')
+@click.pass_context
+def autoresponder_status(ctx):
+    """
+    📊 Show auto responder status
+
+    Displays current status, configuration, and performance metrics.
+    """
+    config_manager = ctx.obj['config_manager']
+    project_path = Path.cwd()
+
+    if not (project_path / '.dopemux').exists():
+        console.print("[red]No Dopemux project found in current directory[/red]")
+        sys.exit(1)
+
+    autoresponder_manager = create_autoresponder_manager(config_manager, project_path)
+    status = autoresponder_manager.get_status()
+
+    # Status overview
+    status_color = "green" if status['running'] else "yellow"
+    status_emoji = "🟢" if status['running'] else "🟡"
+
+    table = Table(title="🤖 Claude Auto Responder Status")
+    table.add_column("Property", style="cyan")
+    table.add_column("Value", style=status_color)
+
+    table.add_row("Status", f"{status_emoji} {status['status'].title()}")
+    table.add_row("Running", "Yes" if status['running'] else "No")
+
+    if status['running']:
+        table.add_row("Uptime", f"{status['uptime_minutes']:.1f} minutes")
+        table.add_row("Responses Sent", str(status['responses_sent']))
+        table.add_row("Response Rate", f"{status['responses_per_minute']:.1f}/min")
+        table.add_row("Attention State", status['attention_state'])
+
+        if status['last_response']:
+            table.add_row("Last Response", status['last_response'])
+
+    console.print(table)
+
+    # Configuration table
+    config_table = Table(title="⚙️ Configuration")
+    config_table.add_column("Setting", style="cyan")
+    config_table.add_column("Value", style="green")
+
+    config = status['config']
+    config_table.add_row("Enabled", "Yes" if config['enabled'] else "No")
+    config_table.add_row("Terminal Scope", config['terminal_scope'])
+    config_table.add_row("Response Delay", f"{config['response_delay']}s")
+    config_table.add_row("Timeout", f"{config['timeout_minutes']} minutes")
+    config_table.add_row("Whitelist Tools", "Yes" if config['whitelist_tools'] else "No")
+    config_table.add_row("Debug Mode", "Yes" if config['debug_mode'] else "No")
+
+    console.print(config_table)
+
+@autoresponder.command('setup')
+@click.pass_context
+def autoresponder_setup(ctx):
+    """
+    🔧 Setup Claude Auto Responder
+
+    Downloads and configures the ClaudeAutoResponder tool for use with Dopemux.
+    """
+    config_manager = ctx.obj['config_manager']
+    project_path = Path.cwd()
+
+    if not (project_path / '.dopemux').exists():
+        console.print("[red]No Dopemux project found in current directory[/red]")
+        sys.exit(1)
+
+    autoresponder_manager = create_autoresponder_manager(config_manager, project_path)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Setting up ClaudeAutoResponder...", total=None)
+
+        success = autoresponder_manager.setup_autoresponder()
+
+        if success:
+            progress.update(task, description="Setup complete! 🎉", completed=True)
+            console.print("[green]✅ ClaudeAutoResponder setup complete[/green]")
+            console.print("[blue]🚀 Run 'dopemux autoresponder start' to begin[/blue]")
+        else:
+            progress.update(task, description="Setup failed", completed=True)
+            console.print("[red]❌ Setup failed[/red]")
+            console.print("[yellow]Check logs for details[/yellow]")
+            sys.exit(1)
+
+@autoresponder.command('config')
+@click.option('--enabled/--disabled', help='Enable or disable auto responder')
+@click.option('--terminal-scope', type=click.Choice(['current', 'all', 'project']),
+              help='Terminal monitoring scope')
+@click.option('--delay', type=float, help='Response delay in seconds (0-10)')
+@click.option('--timeout', type=int, help='Auto-stop timeout in minutes')
+@click.option('--whitelist/--no-whitelist', help='Enable/disable tool whitelisting')
+@click.option('--debug/--no-debug', help='Enable/disable debug mode')
+@click.pass_context
+def autoresponder_config(ctx, enabled, terminal_scope, delay, timeout, whitelist, debug):
+    """
+    ⚙️ Configure auto responder settings
+
+    Update configuration options for Claude Auto Responder integration.
+    """
+    config_manager = ctx.obj['config_manager']
+
+    updates = {}
+    if enabled is not None: updates['enabled'] = enabled
+    if terminal_scope: updates['terminal_scope'] = terminal_scope
+    if delay is not None: updates['response_delay'] = delay
+    if timeout: updates['timeout_minutes'] = timeout
+    if whitelist is not None: updates['whitelist_tools'] = whitelist
+    if debug is not None: updates['debug_mode'] = debug
+
+    if not updates:
+        # Show current config
+        current_config = config_manager.get_claude_autoresponder_config()
+
+        table = Table(title="🤖 Auto Responder Configuration")
+        table.add_column("Setting", style="cyan")
+        table.add_column("Value", style="green")
+
+        table.add_row("Enabled", "Yes" if current_config.enabled else "No")
+        table.add_row("Terminal Scope", current_config.terminal_scope)
+        table.add_row("Response Delay", f"{current_config.response_delay}s")
+        table.add_row("Timeout", f"{current_config.timeout_minutes} minutes")
+        table.add_row("Whitelist Tools", "Yes" if current_config.whitelist_tools else "No")
+        table.add_row("Debug Mode", "Yes" if current_config.debug_mode else "No")
+
+        console.print(table)
+        return
+
+    # Apply updates
+    try:
+        config_manager.update_claude_autoresponder(**updates)
+        console.print("[green]✅ Configuration updated[/green]")
+
+        # Show what changed
+        for key, value in updates.items():
+            console.print(f"[blue]  {key}: {value}[/blue]")
+
+        # Restart if running
+        project_path = Path.cwd()
+        if (project_path / '.dopemux').exists():
+            autoresponder_manager = create_autoresponder_manager(config_manager, project_path)
+            if autoresponder_manager.is_running():
+                console.print("[yellow]🔄 Restarting auto responder with new settings...[/yellow]")
+                autoresponder_manager.restart()
+
+    except ValueError as e:
+        console.print(f"[red]❌ Configuration error: {e}[/red]")
+        sys.exit(1)
 
 def _get_attention_emoji(state: Optional[str]) -> str:
     """Get emoji for attention state."""
