@@ -108,7 +108,9 @@ class TestContextManager:
         context_manager.initialize()
 
         # Store a context first
-        snapshot = ContextSnapshot(**sample_context_data)
+        data = sample_context_data.copy()
+        data['working_directory'] = str(context_manager.project_path)  # Fix working directory
+        snapshot = ContextSnapshot(**data)
         context_manager._store_context(snapshot)
 
         # Restore it
@@ -134,6 +136,7 @@ class TestContextManager:
             data = sample_context_data.copy()
             data['session_id'] = f'session-{i}'
             data['timestamp'] = f'2024-01-01T12:0{i}:00'
+            data['working_directory'] = str(context_manager.project_path)  # Fix working directory
             snapshot = ContextSnapshot(**data)
             context_manager._store_context(snapshot)
 
@@ -152,6 +155,7 @@ class TestContextManager:
             data = sample_context_data.copy()
             data['session_id'] = f'session-{i}'
             data['current_goal'] = f'Goal {i}'
+            data['working_directory'] = str(context_manager.project_path)  # Fix working directory
             snapshot = ContextSnapshot(**data)
             context_manager._store_context(snapshot)
 
@@ -183,17 +187,24 @@ class TestContextManager:
 
     def test_cleanup_old_sessions(self, context_manager, sample_context_data):
         """Test cleaning up old sessions."""
+        from datetime import datetime, timedelta
+
         context_manager.initialize()
 
         # Store old session (simulate by setting old timestamp)
+        old_timestamp = (datetime.now() - timedelta(days=5)).isoformat()  # 5 days ago
         old_data = sample_context_data.copy()
-        old_data['timestamp'] = '2023-01-01T12:00:00'  # Old timestamp
+        old_data['timestamp'] = old_timestamp
+        old_data['working_directory'] = str(context_manager.project_path)  # Fix working directory
         old_snapshot = ContextSnapshot(**old_data)
         context_manager._store_context(old_snapshot)
 
         # Store recent session
+        recent_timestamp = (datetime.now() - timedelta(hours=12)).isoformat()  # 12 hours ago
         recent_data = sample_context_data.copy()
         recent_data['session_id'] = 'recent-session'
+        recent_data['timestamp'] = recent_timestamp
+        recent_data['working_directory'] = str(context_manager.project_path)  # Fix working directory
         recent_snapshot = ContextSnapshot(**recent_data)
         context_manager._store_context(recent_snapshot)
 
@@ -280,7 +291,9 @@ class TestContextManager:
         context_manager.initialize()
 
         # Store context
-        snapshot = ContextSnapshot(**sample_context_data)
+        data = sample_context_data.copy()
+        data['working_directory'] = str(context_manager.project_path)  # Fix working directory
+        snapshot = ContextSnapshot(**data)
         context_manager._store_context(snapshot)
 
         # Retrieve from database

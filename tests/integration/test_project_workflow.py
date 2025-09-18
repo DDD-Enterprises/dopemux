@@ -74,7 +74,7 @@ class TestProjectInitializationWorkflow:
                     with patch('dopemux.cli.Path.cwd', return_value=project_path):
                         result = runner.invoke(cli, ['save', '--message', 'Test checkpoint'])
                         assert result.exit_code == 0
-                        assert "session-123" in result.output
+                        assert "session-" in result.output  # CLI shows session_id[:8]
 
                     # Restore context
                     mock_context_instance.restore_session.return_value = {

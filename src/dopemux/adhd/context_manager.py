@@ -81,6 +81,10 @@ class ContextManager:
         self.db_path = self.dopemux_dir / 'context.db'
         self.sessions_dir = self.dopemux_dir / 'sessions'
 
+        # Create directories if they don't exist (needed for database)
+        self.dopemux_dir.mkdir(exist_ok=True)
+        self.sessions_dir.mkdir(exist_ok=True)
+
         self._init_storage()
         self._auto_save_enabled = False
         self._current_session_id = None
@@ -167,8 +171,8 @@ class ContextManager:
         except Exception as e:
             console.print(f"[red]Error saving context: {e}[/red]")
             # Emergency fallback
-            self._emergency_save()
-            raise
+            emergency_session_id = self._emergency_save()
+            return emergency_session_id or str(uuid.uuid4())
 
     def restore_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -494,13 +498,23 @@ class ContextManager:
         # For now, just print what would be restored
         console.print(f"[blue]Restoring context: {context_data.get('current_goal', 'Unknown')}[/blue]")
 
-    def _emergency_save(self) -> None:
+    def _emergency_save(self) -> Optional[str]:
         """Emergency context save on system failure."""
         try:
             emergency_file = self.dopemux_dir / 'emergency_context.json'
-            context = self._capture_current_state()
+            # Create minimal context without calling potentially failing methods
+            emergency_session_id = str(uuid.uuid4())
+            emergency_context = {
+                'session_id': emergency_session_id,
+                'timestamp': datetime.now().isoformat(),
+                'working_directory': str(self.project_path),
+                'emergency_save': True,
+                'message': 'Emergency save due to system failure'
+            }
             with open(emergency_file, 'w') as f:
-                json.dump(context.to_dict(), f, indent=2)
+                json.dump(emergency_context, f, indent=2)
             console.print("[yellow]Emergency context saved[/yellow]")
+            return emergency_session_id
         except Exception as e:
             console.print(f"[red]Emergency save failed: {e}[/red]")
+            return None

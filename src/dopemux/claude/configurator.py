@@ -321,7 +321,7 @@ Multi-model AI configuration optimized for {template} development with ADHD acco
             "project_type": template,
             "initialized_at": "2024-01-15T10:30:00Z",
             "adhd_profile": {
-                **config.adhd_profile.dict(),
+                **config.adhd_profile.model_dump(),
                 **template_config.get('adhd_adaptations', {})
             },
             "active_features": {

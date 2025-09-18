@@ -268,20 +268,22 @@ Alternative: Set CLAUDE_PATH environment variable
 
     def _resolve_env_vars(self, env_dict: Dict[str, str]) -> Dict[str, str]:
         """Resolve environment variables in MCP server config."""
+        import re
         resolved = {}
 
         for key, value in env_dict.items():
-            if value.startswith('${') and value.endswith('}'):
-                var_name = value[2:-1]
-                # Handle default values
-                if ':' in var_name:
-                    var_name, default = var_name.split(':', 1)
+            # Handle multiple variable substitutions in a single string
+            def replace_var(match):
+                var_part = match.group(1)
+                if ':' in var_part:
+                    var_name, default = var_part.split(':', 1)
                 else:
-                    default = ''
+                    var_name, default = var_part, ''
+                return os.getenv(var_name, default)
 
-                resolved[key] = os.getenv(var_name, default)
-            else:
-                resolved[key] = value
+            # Find all ${VAR} or ${VAR:default} patterns
+            resolved_value = re.sub(r'\$\{([^}]+)\}', replace_var, value)
+            resolved[key] = resolved_value
 
         return resolved
 
