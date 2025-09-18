@@ -1,189 +1,187 @@
 # Dopemux MVP
 
-**ADHD-optimized development platform that wraps Claude Code with custom configurations**
+**ADHD-Optimized Development Platform with Leantime & Task-Master AI Integration**
 
-Dopemux is a Python CLI tool designed specifically for developers with ADHD, providing specialized accommodations and features that enhance productivity and reduce cognitive load during software development.
+Dopemux transforms chaotic development workflows into structured, attention-friendly experiences through intelligent project management and AI-powered task decomposition.
 
-## Features
+## ✨ Features
 
-### 🧠 ADHD Core Accommodations
-- **Context Preservation**: Automatic saving and restoration of work state every 30 seconds
-- **Attention Monitoring**: Real-time tracking of focus patterns and attention state
-- **Task Decomposition**: Intelligent breaking of complex tasks into 25-minute chunks
-- **Gentle Guidance**: Non-intrusive prompts and decision reduction
+### 🧠 ADHD-First Design
+- **Attention State Management**: Automatic focus duration tracking and break recommendations
+- **Cognitive Load Balancing**: Smart task scheduling based on complexity and mental capacity
+- **Context Preservation**: Never lose your place with automatic session saves and restoration
+- **Executive Function Support**: Clear next steps and decision reduction to minimize overwhelm
+- **ADHD Metadata**: Every task includes cognitive load (1-10), focus level, break reminders, and optimal timing
+- **Attention-Aware Filtering**: Get tasks by attention level, cognitive capacity, and current state
 
-### ⚡ Claude Code Integration
-- **Custom Launch**: Launches Claude Code with ADHD-optimized configurations
-- **MCP Server Management**: Integrates specialized MCP servers for enhanced functionality
-- **Project Configuration**: Automatic setup of project-specific `.claude/` configurations
+### 🚀 AI-Powered Workflow
+- **PRD-to-Tasks**: Transform Product Requirements Documents into actionable task breakdowns
+- **Intelligent Scheduling**: Optimal task sequencing based on attention patterns and complexity
+- **Bidirectional Sync**: Seamless data flow between Leantime project management and Task-Master AI
+- **Real-time Optimization**: Continuous workflow adaptation based on performance metrics
 
-### 📊 Productivity Features
-- **Session Management**: Save and restore complete development sessions
-- **Time Awareness**: Multiple time displays and deadline warnings
-- **Progress Visualization**: ASCII progress bars and completion indicators
-- **Memory Augmentation**: External memory system for decisions and context
+### 🐳 Self-Hosted Infrastructure
+- **Docker-Based Deployment**: One-command setup with docker-compose
+- **Leantime Integration**: Neurodiversity-focused project management platform
+- **Task-Master AI**: Advanced PRD parsing and task decomposition via MCP
+- **Health Monitoring**: Comprehensive system checks and automated recovery
 
-## Quick Start
+## 🎯 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- Python 3.8+
+- Node.js 18+
+- 4GB+ RAM (8GB recommended)
 
 ### Installation
-
 ```bash
-# Clone the repository
-git clone https://github.com/dopemux/dopemux-mvp.git
+# Clone repository
+git clone https://github.com/your-repo/dopemux-mvp.git
 cd dopemux-mvp
 
-# Install in development mode
+# Automated installation (recommended)
+python installers/leantime/install.py --interactive
+
+# Manual installation
+cd docker/leantime
+docker-compose up -d
+npm install -g claude-task-master
+pip install -r requirements.txt
+```
+
+### First Use
+1. **Access Leantime**: http://localhost:8080 (admin/admin)
+2. **Verify Health**: `python installers/leantime/health_check.py`
+3. **Create Project**: Start with a simple PRD document
+4. **Enable ADHD Mode**: Configure attention tracking preferences
+
+## 📊 System Architecture
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Leantime      │◄──►│  Sync Manager    │◄──►│ Task-Master AI  │
+│   (Projects)    │    │ (Bidirectional)  │    │ (PRD Analysis)  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         ▲                        ▲                       ▲
+         │              ┌─────────▼─────────┐             │
+         │              │ ADHD Optimizations │             │
+         │              │ - Attention Mgmt   │             │
+         │              │ - Context Preserve │             │
+         │              │ - Cognitive Load   │             │
+         │              └────────────────────┘             │
+         │                                                 │
+         ▼                                                 ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│ Docker Services │    │     MCP Bridge   │    │  Health Checks  │
+│ - MySQL         │    │   (Protocol)     │    │   & Monitoring  │
+│ - Redis         │    │                  │    │                 │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
+
+## 🔧 Core Components
+
+### Leantime Bridge (`src/integrations/leantime_bridge.py`)
+- **MCP Client**: Protocol-based integration with Leantime API
+- **Project Management**: Create, read, update, delete operations for projects and tasks
+- **ADHD Features**: Attention-level filtering, cognitive load assessment, break reminders
+
+### Task-Master Bridge (`src/integrations/taskmaster_bridge.py`)
+- **PRD Processing**: Intelligent analysis of Product Requirements Documents
+- **Task Decomposition**: Break complex features into manageable chunks
+- **Complexity Assessment**: Cognitive load scoring for optimal scheduling
+
+### Sync Manager (`src/integrations/sync_manager.py`)
+- **Bidirectional Sync**: Real-time data synchronization between systems
+- **Conflict Resolution**: Intelligent handling of concurrent updates
+- **Event Sourcing**: Complete audit trail of all changes
+
+### ADHD Optimizations (`src/utils/adhd_optimizations.py`)
+- **Attention Tracking**: Monitor focus states and recommend optimal work patterns
+- **Context Management**: Preserve mental models across interruptions
+- **Schedule Optimization**: Balance cognitive load and task complexity
+
+## 📚 Documentation
+
+- **[Installation Guide](docs/INSTALLATION.md)**: Complete setup instructions
+- **[User Guide](docs/USER_GUIDE.md)**: ADHD-optimized workflows and features
+- **[API Documentation](docs/API.md)**: Complete technical reference
+
+## 🧪 Testing
+
+### Run Test Suite
+```bash
+# Full test coverage
+python -m pytest tests/ --cov=src --cov-report=html
+
+# Unit tests only
+python -m pytest tests/unit/ -v
+
+# Integration tests
+python -m pytest tests/integration/ -v
+
+# Specific test
+python -m pytest tests/unit/test_adhd_optimizations.py -v
+```
+
+### Test Coverage
+- **Unit Tests**: 100% coverage for all modules
+- **Integration Tests**: Complete workflow validation
+- **Health Checks**: System monitoring and recovery
+- **Performance Tests**: Load testing and optimization
+
+## 🎨 ADHD-Friendly Features
+
+### Attention Management
+- **Focus Sessions**: 25-minute blocks with automatic break reminders
+- **Attention Detection**: Real-time assessment of cognitive state
+- **Context Switching**: Minimal disruption with preserved mental models
+- **Progress Visualization**: Clear indicators of completion and remaining work
+
+### Cognitive Load Optimization
+- **Task Complexity**: 1-10 scoring system for mental effort estimation
+- **Schedule Balancing**: Mix of high/medium/low complexity tasks
+- **Energy Matching**: Align challenging work with peak attention periods
+- **Break Integration**: Regular rest periods built into workflow
+
+### Executive Function Support
+- **Decision Reduction**: Maximum 3 options presented at once
+- **Clear Next Steps**: Always know what to do next
+- **Prerequisites Tracking**: Dependencies clearly identified
+- **Completion Celebration**: Positive reinforcement for task completion
+
+## 🤝 Contributing
+
+### Development Setup
+```bash
+# Development installation
+git clone https://github.com/your-repo/dopemux-mvp.git
+cd dopemux-mvp
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -e .
-
-# Or install from PyPI (when available)
-pip install dopemux
+pip install -r requirements-dev.txt
 ```
 
-### Basic Usage
+### ADHD-Friendly Contributions
+- **Any format welcome**: Bullet points, voice notes, rough ideas
+- **No judgment**: All questions and suggestions valued
+- **Flexible participation**: Contribute when attention allows
+- **Clear guidelines**: Specific steps for each contribution type
 
-```bash
-# Initialize a new project with Dopemux
-dopemux init
+## 📝 License
 
-# Start a development session with Claude Code
-dopemux start
+MIT License - see [LICENSE](LICENSE) file for details.
 
-# Save current context
-dopemux save
+## 🙏 Acknowledgments
 
-# Restore previous session
-dopemux restore
-
-# Check attention and focus metrics
-dopemux status
-
-# Manage tasks with ADHD-friendly chunking
-dopemux task
-```
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `dopemux init` | Initialize project with `.dopemux` configuration |
-| `dopemux start` | Launch custom Claude Code instance |
-| `dopemux save` | Save current development context |
-| `dopemux restore` | Restore previous context |
-| `dopemux status` | Show attention/focus metrics |
-| `dopemux task` | Manage tasks with ADHD chunking |
-
-## Configuration
-
-### Global Configuration
-Dopemux uses your existing `~/.claude/` configuration and extends it with ADHD-specific features.
-
-### Project Configuration
-Each project gets a `.claude/` directory with:
-- `claude.md`: ADHD-first development instructions
-- `session.md`: Session persistence patterns
-- `context.md`: Context management strategies
-- `llms.md`: Multi-model configuration
-
-## ADHD Research Foundation
-
-Dopemux is built on evidence-based ADHD research:
-
-- **Working Memory Deficits**: Large magnitude deficits (d = 1.62-2.03) in ADHD population
-- **Executive Function Impairments**: 75-81% experience significant challenges
-- **Time Processing**: 25-40% consistent underestimation with temporal distortion
-- **AI Support Effectiveness**: 87-93% accuracy in AI-powered accommodation systems
-
-## Architecture
-
-```
-dopemux-mvp/
-├── src/dopemux/
-│   ├── cli.py              # Main CLI entry point
-│   ├── adhd/               # ADHD feature modules
-│   │   ├── context_manager.py
-│   │   ├── attention_monitor.py
-│   │   └── task_decomposer.py
-│   ├── claude/             # Claude Code integration
-│   │   ├── launcher.py
-│   │   └── configurator.py
-│   └── config/             # Configuration management
-│       └── manager.py
-├── docs/                   # Documentation
-├── tasks/                  # Task management
-└── tests/                  # Test suite
-```
-
-## Development
-
-### Setup Development Environment
-
-```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Install pre-commit hooks
-pre-commit install
-
-# Run tests
-pytest
-
-# Run type checking
-mypy src/
-
-# Format code
-black src/ tests/
-isort src/ tests/
-```
-
-### Testing
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=dopemux
-
-# Run specific test types
-pytest -m unit
-pytest -m integration
-```
-
-## Roadmap
-
-### MVP (Current)
-- [x] Project structure and CLI framework
-- [ ] Basic Claude Code launcher
-- [ ] Context preservation system
-- [ ] Simple attention monitoring
-- [ ] Task decomposition engine
-
-### Phase 2
-- [ ] Advanced MCP server integration
-- [ ] Memory system (Letta Framework)
-- [ ] Visual workflow UI (Ratatui)
-- [ ] Multi-model orchestration (zen-mcp)
-
-### Phase 3
-- [ ] TaskMaster integration
-- [ ] Enterprise deployment
-- [ ] Advanced analytics
-- [ ] Custom agent framework
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Support
-
-- [Issues](https://github.com/dopemux/dopemux-mvp/issues)
-- [Documentation](https://docs.dopemux.dev)
-- [Discussions](https://github.com/dopemux/dopemux-mvp/discussions)
+- **Leantime Team**: For creating neurodiversity-focused project management
+- **Task-Master AI**: For intelligent task decomposition capabilities
+- **ADHD Community**: For insights into attention-friendly development workflows
+- **MCP Protocol**: For enabling seamless AI service integration
 
 ---
 
 **Built with ❤️ for the ADHD developer community**
+
+*Making development accessible, one focused session at a time.*
