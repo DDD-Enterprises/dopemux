@@ -340,6 +340,21 @@ class ConfigManager:
                 "timeout": 30,
                 "auto_restart": True
             },
+            "zen": {
+                "enabled": True,
+                "command": "npx",
+                "args": ["-y", "zen-mcp"],
+                "env": {
+                    "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+                    "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+                    "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+                    "GROQ_API_KEY": "${GROQ_API_KEY}",
+                    "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+                    "ZEN_DISABLED_TOOLS": "chat,explain,translate,summarize"
+                },
+                "timeout": 60,
+                "auto_restart": True
+            },
             "leantime": {
                 "enabled": False,  # Disabled by default until package is fixed
                 "command": "npx",

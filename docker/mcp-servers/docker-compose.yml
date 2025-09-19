@@ -1,0 +1,35 @@
+services:
+  mas-sequential-thinking:
+    build:
+      context: ./mcp-server-mas-sequential-thinking
+      dockerfile: Dockerfile
+    container_name: mcp-mas-sequential-thinking
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    env_file:
+      - ./mcp-server-mas-sequential-thinking/.env
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 30s
+    volumes:
+      - mcp_logs:/app/logs
+      - mcp_cache:/app/cache
+
+networks:
+  mcp-network:
+    driver: bridge
+    name: mcp-network
+  leantime-net:
+    external: true
+
+volumes:
+  mcp_logs:
+    driver: local
+  mcp_cache:
+    driver: local

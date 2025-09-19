@@ -7,8 +7,10 @@ attention monitoring, and task decomposition for neurodivergent developers.
 """
 
 import sys
+import time
 from pathlib import Path
 from typing import Optional
+from datetime import datetime
 
 import click
 from rich.console import Console
@@ -21,6 +23,7 @@ from .config import ConfigManager
 from .claude import ClaudeLauncher, ClaudeConfigurator
 from .adhd import ContextManager, AttentionMonitor, TaskDecomposer
 from integrations.claude_autoresponder import create_autoresponder_manager
+from .health import HealthChecker
 
 console = Console()
 
@@ -613,6 +616,94 @@ def autoresponder_setup(ctx):
             console.print("[red]❌ Setup failed[/red]")
             console.print("[yellow]Check logs for details[/yellow]")
             sys.exit(1)
+
+@cli.command()
+@click.option('--detailed', '-d', is_flag=True, help='Show detailed health information')
+@click.option('--service', '-s', help='Check specific service only')
+@click.option('--fix', '-f', is_flag=True, help='Attempt to fix unhealthy services')
+@click.option('--watch', '-w', is_flag=True, help='Continuous monitoring mode')
+@click.option('--interval', '-i', type=int, default=30, help='Watch interval in seconds')
+@click.pass_context
+def health(ctx, detailed: bool, service: Optional[str], fix: bool, watch: bool, interval: int):
+    """
+    🏥 Comprehensive health check for Dopemux ecosystem
+
+    Monitors Dopemux core, Claude Code, MCP servers, Docker services,
+    system resources, and ADHD feature effectiveness with ADHD-friendly reporting.
+    """
+    project_path = Path.cwd()
+    health_checker = HealthChecker(project_path, console)
+
+    if watch:
+        console.print(f"[blue]👁️ Starting continuous health monitoring (interval: {interval}s)[/blue]")
+        console.print("[dim]Press Ctrl+C to stop[/dim]")
+
+        try:
+            while True:
+                console.clear()
+                console.print(f"[dim]Last check: {datetime.now().strftime('%H:%M:%S')}[/dim]")
+
+                results = health_checker.check_all(detailed=detailed)
+                health_checker.display_health_report(results, detailed=detailed)
+
+                time.sleep(interval)
+        except KeyboardInterrupt:
+            console.print("\n[yellow]🛑 Health monitoring stopped[/yellow]")
+            return
+
+    # Single health check
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Running health checks...", total=None)
+
+        if service:
+            # Check specific service
+            checker_method = getattr(health_checker, f'_check_{service}', None)
+            if not checker_method:
+                console.print(f"[red]❌ Unknown service: {service}[/red]")
+                console.print(f"[yellow]Available services: {', '.join(health_checker.checks.keys())}[/yellow]")
+                sys.exit(1)
+
+            result = checker_method(detailed=detailed)
+            results = {service: result}
+        else:
+            # Check all services
+            results = health_checker.check_all(detailed=detailed)
+
+        progress.update(task, description="Health checks complete!", completed=True)
+
+    # Display results
+    health_checker.display_health_report(results, detailed=detailed)
+
+    # Fix unhealthy services if requested
+    if fix:
+        console.print("\n[blue]🔧 Attempting to fix unhealthy services...[/blue]")
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            fix_task = progress.add_task("Fixing services...", total=None)
+
+            restarted = health_checker.restart_unhealthy_services()
+
+            progress.update(fix_task, description="Fix attempts complete!", completed=True)
+
+        if restarted:
+            console.print(f"[green]✅ Restarted services: {', '.join(restarted)}[/green]")
+            console.print("[blue]💡 Run 'dopemux health' again to verify fixes[/blue]")
+        else:
+            console.print("[yellow]⚠️ No services could be automatically fixed[/yellow]")
+            console.print("[dim]Manual intervention may be required[/dim]")
+
+    # Exit with appropriate code for scripting
+    critical_count = sum(1 for h in results.values() if h.status.value[0] == 'critical')
+    if critical_count > 0:
+        sys.exit(1)
 
 @autoresponder.command('config')
 @click.option('--enabled/--disabled', help='Enable or disable auto responder')
